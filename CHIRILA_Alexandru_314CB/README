@@ -1,0 +1,158 @@
+CHIRILA ALEXANDRU - 314CB
+
+
+Descriere metode de rezolvare a cerintelor:
+
+	- Modificari aduse structurilor din structures.h pentru a simplifica
+munca si intelegerea programului:
+
+	Structura t_cell (celula generica) inlocuieste cele trei tipuri
+initiale de celule.
+
+	Structura t_line (linie generica) inlocuieste cele trei tipuri
+initiale de linii.
+
+	Modificare adusa structurii t_table: campul "void *lines" a fost
+inlocuit de campul "t_line *lines" ca urmare a modificarilor de mai sus.
+
+	- Consola interactiva:
+
+	Se citeste prima comanda, iar apoi urmeaza o bucla while fara conditie
+de oprire "while(1)" cu cate un "if" pentru fiecare comanda implementata si
+un if pentru cazul in care o comanda a fost introdusa gresit (pentru acest caz)
+exista functia "int comanda(char *)" care returneaza 1 daca sirul primit ca
+parametru este o comanda valida sau 0 daca aceasta este invalida sau daca
+pointerul are valoarea NULL. Parametrii sunt cititi separat de primul cuvant
+din comanda. Executarea unei comenzi include citirea urmatoarei comenzi intr-o
+functie sau direct in main(void).
+
+	- Functii utile pentru dezalocari de memorie:
+
+1) free_columns(t_column*) dezaloca in mod recursiv o lista de coloane.
+
+2) free_cells(t_cell*, t_cellType) dezaloca in mod recursiv o lista de celule.
+
+3) free_line(t_line*, t_cellType) dezaloca o linie de tabel si celulele
+acesteia prin apelarea functiei free_cells.
+
+4) free_lines(t_line*, t_cellType) dezaloca o lista de linii si
+celulele acestor linii prin autoapel si apel la functia free_line.
+
+5) free_table(t_table*) dezaloca un tabel, coloanele, celulele si liniile
+acestuia prin apel la functiile free_columns si free_lines.
+
+6) free_tables(t_table*) dezaloca o lista de tabele cu toate datele acestora
+prin autoapel si prin apelarea functiei free_table()
+
+7) free_db(t_db*) dezaloca baza de date cu tot cu lista de tabele prin apelarea
+functiei free_tables.
+
+	- Comenzi implementate pentru consola interactiva:
+
+1) Comanda INIT_DB:
+
+	Se citeste numele bazei de date (am tratat si cazul in care acesta ar
+contine spatii) si se apeleaza functia "t_db *INIT_DB(char*)" pentru alocarea
+bazei de date.
+
+2) Comanda CREATE:
+
+	Se citeste numele tabelului ce trenuie adaugat, tipul acestuia ca sir
+de caractere si se apeleaza functia "void CREATE(t_db*, char*, char*)" care
+adauga in baza de date un tabel cu numele si tipul specificate (tipul este
+convertit in format t_cellType prin apelarea functiei "t_cellType fel(char*)").
+Coloanele sunt citite de la stdin si adaugate in tabel tot in functia CREATE.
+
+3) Comanda ADD:
+
+	Se citeste numele tabelului si se apeleaza functia ADD(t_db*, char*)
+care va adauga in tabelul specificat linia cu valorile citite de la tastatura
+in formatul corespunzator tipului tabelului daca acesta exista. In caz contrar
+se va afisa mesajul de eroare.
+
+4) Comanda PRINT:
+
+	Se citeste numele tabelului care trebuie afisat si se apeleaza functia
+PRINT(t_db*, char*). Daca tabelul specificat nu exista, atunci se afiseaza
+mesajul de eroare. Daca acesta exiista, atunci se afiseaza datele acelui tabel.
+
+5) Comanda PRINT_DB:
+
+	Se apeleaza functia PRINT_DB(t_db*) care afiseaza toate datele din
+baza de date, aceasta afisand datele din fiecare tabel in acelasi mod ca
+functia PRINT.
+
+6) Comanda CLEAR:
+
+	Se citeste numele tabelului si se apeleaza functia CLEAR(t_db*, char*)
+care elimina toate liniile din tabelul specificat daca acesta exista. Daca
+tabelul nu exista, atunci se afiseaza mesajul corespunzator de eroare.
+
+7) Comanda DELETE:
+
+	Se citeste numele tabelului, apoi se citeste urmatorui caracter pentru
+a decide daca se vrea stergerea integrala a tabelului sau doar a unor linii a
+caror valoare de pe o coloana respecta o conditie in raport cu o valoare
+specificata.
+
+	Daca acel caracter este '\n' (terminator de linie), atunci se apeleaza
+functia DEL_tabel(t_db*, char*) care cauta in lista de tabele din baza de date
+tabelul cu numele specificat. Daca acesta nu exista, atunci se afiseaza mesajul
+de eroare corespunzator. In caz ca acesta exista, se memoreaza in pointerul
+'ant' adresa tabelului precedent tabelului cautat sau NULL, in caz ca tabelul
+ce trebuie eliminat este capul listei de tabele. Mai intai tabelul este exclus
+din lista in mod corespunzator (daca este primul din lista, atunci se multa
+capul listei la urmatorul tabel, altfel dupa tabelul precedent va urma in lista
+urmatorul tabel dupa acesta), iar apoi tabelul este dezalocat prin apelarea
+functiei free_table(t_table*) (functia numarul 5 de la alineatul "Functii
+utile pentru dezalocari de memorie").
+
+	Daca acel  caracter citit dupa numele tabelului nu este '\n', atunci
+se apeleaza functia DEL_linii(t_db, char*) care cauta in lista de tabele din
+baza de date tabelul cu numele specificat. Daca acesta nu exista, atunci se
+afiseaza mesajul de eroare corespunzator si se citeste restul liniei. In caz ca
+acesta exista, se citeste numele coloanei la care se va face referire si se
+cauta aceasta coloana in lista de coloane a tabelului. Daca aceasta nu exista
+se afiseaza mesajul corespunzator de eroare si se citeste restul liniei. Altfel
+se retine pozitia coloanei si se elimina toate liniile a caror celula de pe
+pozitia memorata respecta conditia in raport cu valoarea (acestea se citesc de
+la stdin). Stergerea unei linii se face prin extragerea acesteia din lista (
+similar cu exragerea unui tabele din lista de tabele) urmata de apelul functiei
+free_line(functia numarul 3 de la alineatul "Functii utile pentru dezalocari
+de memorie").
+
+7) Comanda SEARCH:
+
+	Se apeleaza functia "void SEARCH(t_db*, char*)" care gaseste in acelasi
+mod ca functia "DEL_linii" liniile care trebuiesc afisate. Mai intai se
+afiseaza numele tabelului si coloanele acestuia, iar apoi se cauta liniile.
+Cand este gasita o linie a carei celula de pe coloana specificata respecta
+conditia, linia este afisata.
+
+8) Comanda DELETE_DB:
+
+	Se apeleaza functia free_db (functia numarul 7 de la alineatul "Functii
+utile pentru dezalocari de memorie") pentru stergerea bazei de date, se
+dezaloca pointerii cmd si tip_def si se returneaza 0.
+
+	- Specificari:
+
+1) La afisarea valorilor din celule am folosit specificatorii: "%-31d",
+"%-31f"si "%-31s" pentru a afisa valoarea urmata de numarul exact de spatii
+necesar ocuparii a 31 de caractere la afisarea valorii.
+
+2) Unele functii din sursa main.c (singura sursa) depasesc 100 de linii (iar
+functia main depaseste 120 de linii, insa comentariile ocupa 40% sau mai mult
+din acest numar de linii.
+
+3) In README este doar un rezumat al metodelor de implementare. Descrierea
+detaliata se afla in comentariile din programe (main.c si structures.h).
+
+4) Inainte ca checkrul sa mearga bine s-ar putea sa trebuiasca sa 'construiti'
+executabilul (asta face regula build din Makefile). Cel putin eu asa am patit.
+Va asigur ca nu este nicio smecherie la mijloc.
+
+
+Punctaj obtinut pe ceckerul local:
+ - Punctaj total 85.0/85.0
+ - Punctaj valgrind 20.0/20.0
